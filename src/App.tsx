@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { Header } from './components/layout/Header';
 import { HomePage } from './pages/HomePage';
@@ -11,8 +13,9 @@ import { SignupForm } from './components/auth/SignupForm';
 
 type Page = 'home' | 'how-it-works' | 'charities' | 'login' | 'signup' | 'dashboard' | 'admin';
 
-function AppContent() {
-  const [currentPage, setCurrentPage] = useState<Page>('home');
+/* 🔥 Only small change → added initialPage */
+function AppContent({ initialPage = 'home' }: { initialPage?: Page }) {
+  const [currentPage, setCurrentPage] = useState<Page>(initialPage);
   const { user, loading, isAdmin } = useAuth();
 
   useEffect(() => {
@@ -64,6 +67,8 @@ function AppContent() {
         )}
 
         {currentPage === 'dashboard' && user && <UserDashboard />}
+
+        {/* ✅ Admin condition unchanged */}
         {currentPage === 'admin' && user && isAdmin && <AdminDashboard />}
 
         {currentPage === 'dashboard' && !user && (
@@ -99,10 +104,21 @@ function AppContent() {
   );
 }
 
+/* 🔥 Routing added here ONLY */
 function App() {
   return (
     <AuthProvider>
-      <AppContent />
+      <BrowserRouter>
+        <Routes>
+
+          {/* Default App */}
+          <Route path="/" element={<AppContent />} />
+
+          {/* ✅ Admin Route */}
+          <Route path="/admin" element={<AppContent initialPage="admin" />} />
+
+        </Routes>
+      </BrowserRouter>
     </AuthProvider>
   );
 }
